@@ -1,16 +1,95 @@
-# saathi
+# Saathi - Pet Adoption & Care Platform 🐾
 
-A new Flutter project.
+Saathi is a modern Flutter-based mobile application designed to connect pet lovers with their perfect companions. The platform facilitates pet adoption and provides comprehensive pet care services.
 
-## Getting Started
+## 🌟 Features
 
-This project is a starting point for a Flutter application.
+- **Pet Adoption**: Browse and connect with pets available for adoption
+- **User Authentication**: Secure login and registration system
+- **Pet Profiles**: Detailed profiles with images and information
+- **Modern UI**: Beautiful and intuitive user interface
+- **Cross-Platform**: Works on both iOS and Android devices
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠️ Tech Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Frontend**: Flutter
+- **State Management**: Flutter Riverpod
+- **Navigation**: Go Router
+- **Backend**: Firebase
+  - Authentication
+  - Cloud Firestore
+  - Storage
+- **UI Components**:
+  - Google Fonts
+  - Flutter SVG
+  - Cached Network Image
+  - Shimmer Effects
+  - Animated Components
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📱 Screenshots
+
+*Coming soon*
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Flutter SDK (>=3.0.0)
+- Dart SDK (>=3.0.0)
+- Android Studio / VS Code
+- Firebase account
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/whoaryu/saathi.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd saathi
+   ```
+
+3. Install dependencies:
+   ```bash
+   flutter pub get
+   ```
+
+4. Configure Firebase:
+   - Create a new Firebase project
+   - Add your Android/iOS app to the Firebase project
+   - Download and add the configuration files
+   - Enable Authentication and Firestore
+
+5. Run the app:
+   ```bash
+   flutter run
+   ```
+
+## 📁 Project Structure
+
+```
+lib/
+├── main.dart
+├── config/
+├── features/
+├── models/
+├── providers/
+├── services/
+├── utils/
+└── widgets/
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+
+---
+
+Made with ❤️ for pet lovers
