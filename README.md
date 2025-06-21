@@ -2,7 +2,13 @@
 
 Saathi is a modern Flutter-based mobile application designed to connect pet lovers with their perfect companions. The platform facilitates pet adoption and provides comprehensive pet care services.
 
-<table> <tr> <td align="center"> <b>📘 Training Lessons</b><br/> <img src="https://github.com/user-attachments/assets/9adb7784-53dd-49e9-b3ad-fedd955df5c9" width="200"/> </td> <td align="center"> <b>📱 Services</b><br/> <img src="https://github.com/user-attachments/assets/064a29d8-b066-46d7-b828-824bf6950da5" width="200"/> </td> <td align="center"> <b>🎯 Adopt a pet</b><br/> <img src="https://github.com/user-attachments/assets/6440ac45-6917-4673-91bb-be4dcb0415d8" width="200"/> </td> </tr> </table>
+
+## 📱 App Screenshots
+
+| ![](assets/images/ss/1.jpg) | ![](assets/images/ss/3.jpg) | ![](assets/images/ss/5.jpg) |
+|-----------------------------|-----------------------------|-----------------------------|
+| ![](assets/images/ss/6.jpg) | ![](assets/images/ss/7.jpg) | ![](assets/images/ss/8.jpg) |
+| ![](assets/images/ss/9.jpg) |                             |                             |
 
 
 ## 🌟 Features
