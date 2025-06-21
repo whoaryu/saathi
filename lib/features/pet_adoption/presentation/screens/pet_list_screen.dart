@@ -30,13 +30,32 @@ class _PetListScreenState extends State<PetListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPets();
+    _testConnectionAndLoadPets();
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> _testConnectionAndLoadPets() async {
+    // Test connection first
+    final isConnected = await ServiceProvider().apiService.testConnection();
+    if (!isConnected) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('❌ Cannot connect to server. Please check your network connection.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+    
+    // Load pets regardless of connection test result
+    _loadPets();
   }
 
   Future<void> _loadPets() async {
@@ -203,17 +222,82 @@ class _PetListScreenState extends State<PetListScreen> {
               }
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ServiceProvider().authService.logout();
-              if (mounted) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginScreen()),
-                );
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.settings),
+            onSelected: (value) async {
+              switch (value) {
+                case 'profile':
+                  // TODO: Navigate to profile screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Profile feature coming soon!')),
+                  );
+                  break;
+                case 'settings':
+                  // TODO: Navigate to settings screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Settings feature coming soon!')),
+                  );
+                  break;
+                case 'help':
+                  // TODO: Navigate to help screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Help feature coming soon!')),
+                  );
+                  break;
+                case 'logout':
+                  await ServiceProvider().authService.logout();
+                  if (mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    );
+                  }
+                  break;
               }
             },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'profile',
+                child: Row(
+                  children: [
+                    Icon(Icons.person, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('Profile'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.settings, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('Settings'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem<String>(
+                value: 'help',
+                child: Row(
+                  children: [
+                    Icon(Icons.help_outline, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('Help & Support'),
+                  ],
+                ),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Logout', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

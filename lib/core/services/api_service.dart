@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:5000/api';
+  static const String baseUrl = 'http://192.168.0.101:5000/api';
   final SharedPreferences _prefs;
 
   ApiService(this._prefs);
@@ -23,22 +23,49 @@ class ApiService {
     final uri = Uri.parse('$baseUrl$endpoint').replace(
       queryParameters: queryParams,
     );
-    final response = await http.get(uri, headers: headers);
-    _handleError(response);
-    return response;
+    
+    print('🌐 Making GET request to: $uri');
+    print('📋 Headers: $headers');
+    
+    try {
+      final response = await http.get(uri, headers: headers);
+      print('✅ Response status: ${response.statusCode}');
+      print('📄 Response body: ${response.body}');
+      
+      _handleError(response);
+      return response;
+    } catch (e) {
+      print('❌ Error in GET request: $e');
+      rethrow;
+    }
   }
 
   Future<http.Response> post(
     String endpoint, {
     Map<String, dynamic>? body,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: headers,
-      body: body != null ? json.encode(body) : null,
-    );
-    _handleError(response);
-    return response;
+    final uri = Uri.parse('$baseUrl$endpoint');
+    
+    print('🌐 Making POST request to: $uri');
+    print('📋 Headers: $headers');
+    print('📦 Body: $body');
+    
+    try {
+      final response = await http.post(
+        uri,
+        headers: headers,
+        body: body != null ? json.encode(body) : null,
+      );
+      
+      print('✅ Response status: ${response.statusCode}');
+      print('📄 Response body: ${response.body}');
+      
+      _handleError(response);
+      return response;
+    } catch (e) {
+      print('❌ Error in POST request: $e');
+      rethrow;
+    }
   }
 
   Future<http.Response> patch(
@@ -66,6 +93,19 @@ class ApiService {
   void _handleError(http.Response response) {
     if (response.statusCode >= 400) {
       throw Exception(response.body);
+    }
+  }
+
+  // Test connection method for debugging
+  Future<bool> testConnection() async {
+    try {
+      print('🔍 Testing connection to: $baseUrl');
+      final response = await http.get(Uri.parse('$baseUrl/pets'), headers: headers);
+      print('✅ Connection test successful: ${response.statusCode}');
+      return response.statusCode == 200;
+    } catch (e) {
+      print('❌ Connection test failed: $e');
+      return false;
     }
   }
 }

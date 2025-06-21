@@ -10,8 +10,9 @@ module.exports = {
     apiSecret: process.env.CLOUDINARY_API_SECRET
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://192.168.0.101:3000', '*'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true
   }
 }; 

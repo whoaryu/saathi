@@ -15,24 +15,39 @@ class PetService {
     int? minAge,
     int? maxAge,
   }) async {
-    final queryParams = <String, String>{};
-    if (type != null) queryParams['type'] = type;
-    if (searchTerm != null) queryParams['search'] = searchTerm;
-    if (minAge != null) queryParams['minAge'] = minAge.toString();
-    if (maxAge != null) queryParams['maxAge'] = maxAge.toString();
+    try {
+      final queryParams = <String, String>{};
+      if (type != null) queryParams['type'] = type;
+      if (searchTerm != null) queryParams['search'] = searchTerm;
+      if (minAge != null) queryParams['minAge'] = minAge.toString();
+      if (maxAge != null) queryParams['maxAge'] = maxAge.toString();
 
-    final response = await _apiService.get('/pets', queryParams: queryParams);
-    final data = json.decode(response.body);
-    
-    if (data['success'] == true) {
-      if (data['data'] is List) {
-        return (data['data'] as List).map((json) => Pet.fromJson(json)).toList();
-      } else if (data['data'] is Map) {
-        // If the API returns a single pet as a map
-        return [Pet.fromJson(data['data'])];
+      print('🐕 Fetching pets with params: $queryParams');
+      
+      final response = await _apiService.get('/pets', queryParams: queryParams);
+      final data = json.decode(response.body);
+      
+      print('📊 Response data: $data');
+      
+      if (data['success'] == true) {
+        if (data['data'] is List) {
+          final pets = (data['data'] as List).map((json) => Pet.fromJson(json)).toList();
+          print('✅ Successfully loaded ${pets.length} pets');
+          return pets;
+        } else if (data['data'] is Map) {
+          // If the API returns a single pet as a map
+          final pet = Pet.fromJson(data['data']);
+          print('✅ Successfully loaded 1 pet');
+          return [pet];
+        }
       }
+      
+      print('⚠️ No pets found or invalid response format');
+      return [];
+    } catch (e) {
+      print('❌ Error fetching pets: $e');
+      rethrow;
     }
-    return [];
   }
 
   Future<Pet> getPet(String id) async {

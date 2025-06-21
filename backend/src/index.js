@@ -25,6 +25,8 @@ app.use('/api/auth', require('./routes/auth.routes'));
 app.use(errorHandler);
 
 // Start server
-app.listen(config.port, () => {
-  console.log(`Server is running on port ${config.port}`);
+app.listen(config.port, '0.0.0.0', () => {
+  console.log(`Server is running on http://0.0.0.0:${config.port}`);
+  console.log(`Local access: http://localhost:${config.port}`);
+  console.log(`Network access: http://192.168.0.101:${config.port}`);
 }); 
