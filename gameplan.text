@@ -1,0 +1,84 @@
+# 📅 2-Week Game Plan: Saathi Pet App (Interview Prep)
+
+## 🎯 Goal
+Polish, debug, and deeply understand the existing app and backend. Focus on quality, clarity, and your ability to explain the project end-to-end. No new features unless critical.
+
+---
+
+## Week 1: Code Cleanup, Bug Fixing, and Deep Understanding
+
+### Day 1-2: Project Walkthrough & Setup
+- Review project structure (backend & frontend)
+- Draw a high-level architecture diagram (API, DB, Flutter, etc.)
+- List all major features (auth, adoption, profile, favorites, etc.)
+- Run the app and backend, note any errors or warnings
+- Fix any critical startup issues
+
+### Day 3-4: Bug Fixing & Redundancy Removal
+- Go through all screens and flows, note bugs or broken features
+- Remove or comment out unfinished/redundant features (UI and backend)
+- Test all API endpoints with Postman/cURL (auth, pets, favorites, etc.)
+- Fix any 404s, crashes, or inconsistent behaviors
+
+### Day 5: UI/UX Polish (Round 1)
+- Review all screens for visual consistency
+- Fix padding, alignment, color, and font issues
+- Ensure navigation is smooth and intuitive
+- Remove duplicate/unused widgets and screens
+
+### Day 6: Backend Review & Cleanup
+- Review all backend routes and models
+- Remove unused endpoints or models
+- Add comments to complex logic
+- Test error handling and edge cases
+
+### Day 7: Checkpoint & Self-Review
+- Try explaining the project to a friend or rubber duck
+- Write a 1-page summary: "How does Saathi Pet App work?"
+- List any areas you still find confusing
+
+---
+
+## Week 2: Documentation, Polish, and Mastery
+
+### Day 8-9: Documentation & Diagrams
+- Write clear README for both backend and frontend
+- Document API endpoints (inputs, outputs, errors)
+- Add code comments where missing
+- Update or create architecture and flow diagrams
+
+### Day 10: UI/UX Polish (Round 2)
+- Add helpful error messages and loading indicators
+- Ensure all forms have validation and feedback
+- Test on different devices/screen sizes
+
+### Day 11: Backend-Frontend Integration Review
+- Trace a full user flow (e.g., login → adopt → favorite → profile)
+- Check token handling, error propagation, and data sync
+- Fix any integration bugs
+
+### Day 12: Practice Explaining & Q&A
+- Practice explaining each feature (what, why, how)
+- Prepare answers for: "What was the hardest bug?", "How does auth work?", "How does the backend store data?"
+- Record yourself or explain to a peer
+
+### Day 13: Mock Interview & Final Polish
+- Do a mock interview (with a friend or solo)
+- Answer: "Walk me through your project"
+- Polish any last rough edges
+
+### Day 14: Rest & Light Review
+- Skim code and docs
+- Rest and build confidence
+
+---
+
+## 🔑 Tips
+- Focus on depth, not breadth: know what you have, not what you wish you had
+- Remove anything you can't explain or that doesn't work
+- Use diagrams and summaries to clarify your own understanding
+- Practice, practice, practice explaining!
+
+---
+
+**You got this! Focus on polish, clarity, and confidence. Good luck!**

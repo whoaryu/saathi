@@ -1,15 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:saathi/core/services/service_provider.dart';
 import 'package:saathi/features/pet_adoption/domain/models/pet.dart';
 import 'package:saathi/features/pet_adoption/presentation/screens/pet_detail_screen.dart';
+import 'package:saathi/features/favorites/presentation/widgets/favorite_button.dart';
 
-class PetCard extends StatelessWidget {
+class PetCard extends StatefulWidget {
   final Pet pet;
+  final bool showFavoriteButton;
+  final VoidCallback? onFavoriteToggle;
 
   const PetCard({
     super.key,
     required this.pet,
+    this.showFavoriteButton = true,
+    this.onFavoriteToggle,
   });
+
+  @override
+  State<PetCard> createState() => _PetCardState();
+}
+
+class _PetCardState extends State<PetCard> {
+  bool _isFavorited = false;
+  bool _isLoadingFavoriteStatus = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showFavoriteButton) {
+      _checkFavoriteStatus();
+    } else {
+      _isLoadingFavoriteStatus = false;
+    }
+  }
+
+  Future<void> _checkFavoriteStatus() async {
+    try {
+      final serviceProvider = ServiceProvider();
+      final isFavorited = await serviceProvider.favoritesService.isFavorited(widget.pet.id);
+      if (mounted) {
+        setState(() {
+          _isFavorited = isFavorited;
+          _isLoadingFavoriteStatus = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingFavoriteStatus = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +61,7 @@ class PetCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => PetDetailScreen(pet: pet),
+            builder: (context) => PetDetailScreen(pet: widget.pet),
           ),
         );
       },
@@ -36,7 +79,7 @@ class PetCard extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    pet.imageUrl,
+                    widget.pet.imageUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -62,13 +105,30 @@ class PetCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
-                        pet.type,
+                        widget.pet.type,
                         style: Theme.of(context).textTheme.labelMedium?.copyWith(
                               color: Theme.of(context).colorScheme.onPrimaryContainer,
                             ),
                       ),
                     ),
                   ),
+                  // Favorite button
+                  if (widget.showFavoriteButton && !_isLoadingFavoriteStatus)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: FavoriteButton(
+                        petId: widget.pet.id,
+                        initialIsFavorited: _isFavorited,
+                        size: 20,
+                        onToggle: () {
+                          setState(() {
+                            _isFavorited = !_isFavorited;
+                          });
+                          widget.onFavoriteToggle?.call();
+                        },
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -78,7 +138,7 @@ class PetCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    pet.name,
+                    widget.pet.name,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -87,9 +147,9 @@ class PetCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    pet.breed,
+                    widget.pet.breed,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -105,7 +165,7 @@ class PetCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          pet.location,
+                          widget.pet.location,
                           style: Theme.of(context).textTheme.bodySmall,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

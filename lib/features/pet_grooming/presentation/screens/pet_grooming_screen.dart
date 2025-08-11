@@ -79,24 +79,21 @@ class _PetGroomingScreenState extends State<PetGroomingScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Pet Grooming'),
-          bottom: TabBar(
-            tabs: [
-              Tab(
-                icon: const Icon(Icons.spa),
-                text: 'Services',
-              ),
-              Tab(
-                icon: const Icon(Icons.calendar_today),
-                text: 'Book a Slot',
-              ),
-              Tab(
-                icon: const Icon(Icons.list_alt),
-                text: 'My Bookings',
-              ),
-            ],
-          ),
+        bottomNavigationBar: TabBar(
+          tabs: [
+            Tab(
+              icon: const Icon(Icons.spa),
+              text: 'Services',
+            ),
+            Tab(
+              icon: const Icon(Icons.calendar_today),
+              text: 'Book a Slot',
+            ),
+            Tab(
+              icon: const Icon(Icons.list_alt),
+              text: 'My Bookings',
+            ),
+          ],
         ),
         body: TabBarView(
           children: [

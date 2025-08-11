@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:saathi/core/services/service_provider.dart';
-import 'package:saathi/features/pet_adoption/presentation/screens/pet_list_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:saathi/features/auth/presentation/providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _acceptTerms = false;
 
   @override
   void dispose() {
@@ -28,20 +29,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
+    
+    if (!_acceptTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 8),
+              const Expanded(child: Text('Please accept the terms and conditions')),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
-      await ServiceProvider().authService.register(
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.register(
         name: _nameController.text,
         email: _emailController.text,
         password: _passwordController.text,
       );
 
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const PetListScreen()),
+      if (mounted && success) {
+        // Navigation will be handled by AuthWrapper
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      } else if (mounted) {
+        // Show error from auth provider
+        final error = authProvider.error;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(child: Text(error ?? 'Registration failed')),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -326,12 +369,72 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your password';
                               }
-                              if (value.length < 6) {
-                                return 'Password must be at least 6 characters';
+                              if (value.length < 8) {
+                                return 'Password must be at least 8 characters';
+                              }
+                              if (!value.contains(RegExp(r'[A-Z]'))) {
+                                return 'Password must contain at least one uppercase letter';
+                              }
+                              if (!value.contains(RegExp(r'[a-z]'))) {
+                                return 'Password must contain at least one lowercase letter';
+                              }
+                              if (!value.contains(RegExp(r'[0-9]'))) {
+                                return 'Password must contain at least one number';
+                              }
+                              if (!value.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
+                                return 'Password must contain at least one special character';
                               }
                               return null;
                             },
                           ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // Terms and conditions checkbox
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _acceptTerms,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _acceptTerms = value ?? false;
+                                  });
+                                },
+                                activeColor: Colors.green[600],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    style: TextStyle(
+                                      color: Colors.grey[700],
+                                      fontSize: 14,
+                                    ),
+                                    children: [
+                                      const TextSpan(text: 'I agree to the '),
+                                      TextSpan(
+                                        text: 'Terms of Service',
+                                        style: TextStyle(
+                                          color: Colors.green[600],
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const TextSpan(text: ' and '),
+                                      TextSpan(
+                                        text: 'Privacy Policy',
+                                        style: TextStyle(
+                                          color: Colors.green[600],
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ).animate().fadeIn().slideX(begin: 0.2, end: 0, delay: const Duration(milliseconds: 350)),
                           
                           const SizedBox(height: 24),
                           
@@ -390,36 +493,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ).animate().fadeIn().slideY(begin: 0.2, end: 0, delay: const Duration(milliseconds: 400)),
                           
-                          const SizedBox(height: 20),
-                          
-                          // Terms and conditions
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[50],
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey[200]!),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  color: Colors.grey[600],
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'By creating an account, you agree to our terms and privacy policy',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ).animate().fadeIn().slideY(begin: 0.2, end: 0, delay: const Duration(milliseconds: 500)),
+
                         ],
                       ),
                     ).animate().fadeIn().slideY(begin: 0.3, end: 0, delay: const Duration(milliseconds: 200)),

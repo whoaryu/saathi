@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:saathi/core/services/service_provider.dart';
 import 'package:saathi/features/pet_adoption/domain/models/pet.dart';
 import 'package:saathi/features/pet_adoption/presentation/widgets/adoption_request_dialog.dart';
+import 'package:saathi/features/favorites/presentation/widgets/favorite_button.dart';
 
 class PetDetailScreen extends StatelessWidget {
   final Pet pet;
@@ -87,6 +88,11 @@ class PetDetailScreen extends StatelessWidget {
                                 color: Theme.of(context).colorScheme.onPrimaryContainer,
                               ),
                         ),
+                      ),
+                      const SizedBox(width: 8),
+                      FavoriteButton(
+                        petId: pet.id,
+                        size: 28,
                       ),
                     ],
                   ),

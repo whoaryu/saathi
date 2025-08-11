@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
 import 'package:saathi/core/services/service_provider.dart';
-import 'package:saathi/features/auth/presentation/screens/login_screen.dart';
+import 'package:saathi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:saathi/features/pet_adoption/domain/models/pet.dart';
 import 'package:saathi/features/pet_adoption/presentation/screens/add_pet_screen.dart';
 import 'package:saathi/features/pet_adoption/presentation/screens/pet_detail_screen.dart';
@@ -10,6 +11,7 @@ import 'package:saathi/features/pet_grooming/presentation/screens/pet_grooming_s
 import 'package:saathi/features/pet_training/presentation/screens/pet_training_screen.dart';
 import 'package:saathi/features/pet_training/presentation/screens/pet_selection_screen.dart';
 import 'package:saathi/features/pet_shop/presentation/screens/pet_shop_screen.dart';
+import 'package:saathi/features/pet_adoption/presentation/screens/pet_swipe_screen.dart';
 
 class PetListScreen extends StatefulWidget {
   const PetListScreen({super.key});
@@ -26,6 +28,7 @@ class _PetListScreenState extends State<PetListScreen> {
   String? _selectedBreed;
   String? _selectedLocation;
   final _searchController = TextEditingController();
+  bool _isSwipeView = false; // Toggle between grid and swipe view
 
   @override
   void initState() {
@@ -168,33 +171,37 @@ class _PetListScreenState extends State<PetListScreen> {
     }
     switch (_selectedIndex) {
       case 0:
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search pets...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+        if (_isSwipeView) {
+          return PetSwipeScreen();
+        } else {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search pets...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        _loadPets();
+                      },
+                    ),
                   ),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _searchController.clear();
-                      _loadPets();
-                    },
-                  ),
+                  onSubmitted: (_) => _loadPets(),
                 ),
-                onSubmitted: (_) => _loadPets(),
               ),
-            ),
-            _buildFilterChips(),
-            Expanded(child: _buildPetGrid()),
-          ],
-        );
+              _buildFilterChips(),
+              Expanded(child: _buildPetGrid()),
+            ],
+          );
+        }
       case 1:
         return const PetGroomingScreen();
       case 2:
@@ -210,6 +217,17 @@ class _PetListScreenState extends State<PetListScreen> {
       appBar: AppBar(
         title: const Text('Saathi Pet'),
         actions: [
+          // View toggle button (only show in adopt tab)
+          if (_selectedIndex == 0)
+            IconButton(
+              icon: Icon(_isSwipeView ? Icons.grid_view : Icons.swipe),
+              onPressed: () {
+                setState(() {
+                  _isSwipeView = !_isSwipeView;
+                });
+              },
+              tooltip: _isSwipeView ? 'Switch to Grid View' : 'Switch to Swipe View',
+            ),
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () async {
@@ -222,83 +240,7 @@ class _PetListScreenState extends State<PetListScreen> {
               }
             },
           ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.settings),
-            onSelected: (value) async {
-              switch (value) {
-                case 'profile':
-                  // TODO: Navigate to profile screen
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Profile feature coming soon!')),
-                  );
-                  break;
-                case 'settings':
-                  // TODO: Navigate to settings screen
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Settings feature coming soon!')),
-                  );
-                  break;
-                case 'help':
-                  // TODO: Navigate to help screen
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Help feature coming soon!')),
-                  );
-                  break;
-                case 'logout':
-                  await ServiceProvider().authService.logout();
-                  if (mounted) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    );
-                  }
-                  break;
-              }
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem<String>(
-                value: 'profile',
-                child: Row(
-                  children: [
-                    Icon(Icons.person, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Text('Profile'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'settings',
-                child: Row(
-                  children: [
-                    Icon(Icons.settings, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Text('Settings'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'help',
-                child: Row(
-                  children: [
-                    Icon(Icons.help_outline, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Text('Help & Support'),
-                  ],
-                ),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('Logout', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          
         ],
       ),
       body: _buildBody(),

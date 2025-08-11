@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:saathi/core/services/service_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:saathi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:saathi/features/auth/presentation/screens/register_screen.dart';
-import 'package:saathi/features/pet_adoption/presentation/screens/pet_list_screen.dart';
+import 'package:saathi/features/auth/presentation/screens/forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
+  bool _rememberMe = false;
 
   @override
   void dispose() {
@@ -31,24 +33,27 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await ServiceProvider().authService.login(
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.login(
         email: _emailController.text,
         password: _passwordController.text,
       );
 
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const PetListScreen()),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
+      if (mounted && success) {
+        // Navigation will be handled by AuthWrapper
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      } else if (mounted) {
+        // Show error from auth provider
+        final error = authProvider.error;
         String errorMessage = 'An error occurred';
-        if (e.toString().contains('Invalid credentials')) {
-          errorMessage = 'Invalid email or password';
-        } else if (e.toString().contains('User not found')) {
-          errorMessage = 'No account found with this email';
+        if (error != null) {
+          if (error.contains('Invalid credentials') || error.contains('Invalid email or password')) {
+            errorMessage = 'Invalid email or password';
+          } else if (error.contains('User not found')) {
+            errorMessage = 'No account found with this email';
+          } else {
+            errorMessage = error;
+          }
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +63,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Icon(Icons.error_outline, color: Colors.white),
                 const SizedBox(width: 8),
                 Expanded(child: Text(errorMessage)),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(child: Text(e.toString())),
               ],
             ),
             backgroundColor: Colors.red,
@@ -295,12 +321,37 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter your password';
                               }
-                              if (value.length < 6) {
-                                return 'Password must be at least 6 characters';
-                              }
                               return null;
                             },
                           ),
+                          
+                          const SizedBox(height: 16),
+                          
+                          // Remember me checkbox
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: _rememberMe,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _rememberMe = value ?? false;
+                                  });
+                                },
+                                activeColor: Colors.blue[600],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                              Text(
+                                'Remember me',
+                                style: TextStyle(
+                                  color: Colors.grey[700],
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ).animate().fadeIn().slideX(begin: 0.2, end: 0, delay: const Duration(milliseconds: 300)),
                           
                           const SizedBox(height: 24),
                           
@@ -358,6 +409,36 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                             ),
                           ).animate().fadeIn().slideY(begin: 0.2, end: 0, delay: const Duration(milliseconds: 400)),
+                          
+                          const SizedBox(height: 20),
+                          
+                          // Forgot password link
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ForgotPasswordScreen(),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                'Forgot Password?',
+                                style: TextStyle(
+                                  color: Colors.blue[600],
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ).animate().fadeIn().slideY(begin: 0.2, end: 0, delay: const Duration(milliseconds: 450)),
                           
                           const SizedBox(height: 20),
                           

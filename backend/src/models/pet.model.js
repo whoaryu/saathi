@@ -31,7 +31,7 @@ const petSchema = new mongoose.Schema({
     required: [true, 'Pet location is required'],
     trim: true
   },
-  imageUrl: {
+  image: {
     type: String,
     required: false
   },
