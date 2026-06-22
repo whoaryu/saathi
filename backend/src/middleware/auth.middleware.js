@@ -115,6 +115,7 @@ const optionalAuth = async (req, res, next) => {
 
 module.exports = {
   auth,
+  authenticateToken: auth,
   adminAuth,
   optionalAuth
 }; 

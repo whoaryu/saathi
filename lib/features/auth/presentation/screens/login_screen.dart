@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
-import 'package:saathi/features/auth/presentation/providers/auth_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:saathi/core/theme/app_theme.dart';
+import 'package:saathi/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:saathi/features/auth/presentation/bloc/auth_event.dart';
+import 'package:saathi/features/auth/presentation/bloc/auth_state.dart';
 import 'package:saathi/features/auth/presentation/screens/register_screen.dart';
 import 'package:saathi/features/auth/presentation/screens/forgot_password_screen.dart';
 
@@ -16,7 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
   bool _obscurePassword = true;
   bool _rememberMe = false;
 
@@ -27,80 +29,14 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future<void> _login() async {
+  void _login() {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.login(
-        email: _emailController.text,
-        password: _passwordController.text,
-      );
-
-      if (mounted && success) {
-        // Navigation will be handled by AuthWrapper
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-      } else if (mounted) {
-        // Show error from auth provider
-        final error = authProvider.error;
-        String errorMessage = 'An error occurred';
-        if (error != null) {
-          if (error.contains('Invalid credentials') || error.contains('Invalid email or password')) {
-            errorMessage = 'Invalid email or password';
-          } else if (error.contains('User not found')) {
-            errorMessage = 'No account found with this email';
-          } else {
-            errorMessage = error;
-          }
-        }
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(child: Text(errorMessage)),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_outline, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(child: Text(e.toString())),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-            behavior: SnackBarBehavior.floating,
-            margin: const EdgeInsets.all(16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    context.read<AuthBloc>().add(
+      AuthLoginRequested(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      ),
+    );
   }
 
   Widget _buildTextField({
@@ -139,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
               color: Colors.blue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.blue[600], size: 20),
+            child: Icon(icon, color: AppTheme.primaryColor, size: 20),
           ),
           suffixIcon: isPassword
               ? IconButton(
@@ -170,7 +106,44 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthAuthenticated) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        } else if (state is AuthFailure) {
+          String errorMessage = 'An error occurred';
+          final error = state.errorMessage;
+          if (error.contains('Invalid credentials') || error.contains('Invalid email or password')) {
+            errorMessage = 'Invalid email or password';
+          } else if (error.contains('User not found')) {
+            errorMessage = 'No account found with this email';
+          } else {
+            errorMessage = error;
+          }
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(errorMessage)),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.all(16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
+        return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -337,7 +310,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     _rememberMe = value ?? false;
                                   });
                                 },
-                                activeColor: Colors.blue[600],
+                                activeColor: AppTheme.primaryColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -361,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             height: 56,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [Colors.blue[600]!, Colors.purple[600]!],
+                                colors: [AppTheme.primaryColor, AppTheme.secondaryColor],
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                               ),
@@ -375,7 +348,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ],
                             ),
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _login,
+                              onPressed: isLoading ? null : _login,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
                                 shadowColor: Colors.transparent,
@@ -383,7 +356,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(16),
                                 ),
                               ),
-                              child: _isLoading
+                              child: isLoading
                                   ? const SizedBox(
                                       height: 24,
                                       width: 24,
@@ -432,7 +405,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               child: Text(
                                 'Forgot Password?',
                                 style: TextStyle(
-                                  color: Colors.blue[600],
+                                  color: AppTheme.primaryColor,
                                   fontSize: 14,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -470,7 +443,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Text(
                                   'Sign Up',
                                   style: TextStyle(
-                                    color: Colors.blue[600],
+                                    color: AppTheme.primaryColor,
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -500,6 +473,8 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 }

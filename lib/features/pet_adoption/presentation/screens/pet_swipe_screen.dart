@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saathi/core/services/service_provider.dart';
 import 'package:saathi/features/pet_adoption/domain/models/pet.dart';
 import 'package:saathi/features/pet_adoption/presentation/screens/pet_detail_screen.dart';
 import 'package:saathi/features/favorites/presentation/widgets/favorite_button.dart';
+import 'package:saathi/features/pet_adoption/presentation/bloc/matchmaker_bloc.dart';
+import 'package:saathi/features/pet_adoption/presentation/bloc/matchmaker_event.dart';
+import 'package:saathi/features/pet_adoption/presentation/bloc/matchmaker_state.dart';
 
 class PetSwipeCard extends StatelessWidget {
   final Pet pet;
@@ -55,6 +59,13 @@ class PetSwipeCard extends StatelessWidget {
                 end: Alignment.bottomCenter,
               ),
             ),
+          ),
+          
+          // Match Score Pill Overlay
+          Positioned(
+            top: 16,
+            right: 16,
+            child: MatchScorePill(pet: pet),
           ),
           
           // Pet Information
@@ -284,7 +295,6 @@ class _PetSwipeScreenState extends State<PetSwipeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
       
       body: Column(
         children: [
@@ -519,10 +529,19 @@ class _PetSwipeScreenState extends State<PetSwipeScreen>
     });
   }
 
-  void _onPetLiked(Pet pet) {
+  void _onPetLiked(Pet pet) async {
     // Handle pet liked - add to favorites, show interest, etc.
     print('Liked: ${pet.name}');
-    _showSnackBar('${pet.name} added to your favorites! ❤️', Colors.green);
+    try {
+      final result = await ServiceProvider().favoritesService.addToFavorites(pet.id);
+      if (result['success'] == true) {
+        _showSnackBar('${pet.name} added to your favorites! ❤️', Colors.green);
+      } else {
+        _showSnackBar(result['message'] ?? 'Failed to add to favorites', Colors.orange);
+      }
+    } catch (e) {
+      _showSnackBar('Network error saving favorite', Colors.red);
+    }
   }
 
   void _onPetRejected(Pet pet) {
@@ -548,6 +567,108 @@ class _PetSwipeScreenState extends State<PetSwipeScreen>
         backgroundColor: color,
         duration: const Duration(seconds: 2),
       ),
+    );
+  }
+}
+
+class MatchScorePill extends StatefulWidget {
+  final Pet pet;
+  const MatchScorePill({super.key, required this.pet});
+
+  @override
+  State<MatchScorePill> createState() => _MatchScorePillState();
+}
+
+class _MatchScorePillState extends State<MatchScorePill> {
+  late final MatchmakerBloc _matchmakerBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _matchmakerBloc = MatchmakerBloc()..add(MatchmakerScoreRequested(pet: widget.pet));
+  }
+
+  @override
+  void dispose() {
+    _matchmakerBloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MatchmakerBloc, MatchmakerState>(
+      bloc: _matchmakerBloc,
+      builder: (context, state) {
+        if (state is MatchmakerSuccess) {
+          final percentage = (state.score * 100).toStringAsFixed(0);
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.bolt, color: Colors.amber, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  '$percentage% Match',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        if (state is MatchmakerLoading) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Calculating...',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        return const SizedBox.shrink();
+      },
     );
   }
 } 

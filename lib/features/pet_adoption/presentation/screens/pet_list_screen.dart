@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
 import 'package:saathi/core/services/service_provider.dart';
-import 'package:saathi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:saathi/features/pet_adoption/domain/models/pet.dart';
 import 'package:saathi/features/pet_adoption/presentation/screens/add_pet_screen.dart';
 import 'package:saathi/features/pet_adoption/presentation/screens/pet_detail_screen.dart';

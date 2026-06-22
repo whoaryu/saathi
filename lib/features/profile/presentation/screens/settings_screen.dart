@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:saathi/core/services/service_provider.dart';
-import 'package:saathi/features/auth/presentation/providers/auth_provider.dart';
+import 'package:saathi/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:saathi/features/auth/presentation/bloc/auth_event.dart';
 import 'package:saathi/features/auth/presentation/screens/login_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -99,8 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Navigator.of(context).pop(); // Close dialog
         
         // Logout and navigate to login
-        final authProvider = Provider.of<AuthProvider>(context, listen: false);
-        await authProvider.logout();
+        context.read<AuthBloc>().add(const AuthLogoutRequested());
         
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -405,9 +405,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                   child: ElevatedButton(
-                    onPressed: () async {
-                      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                      await authProvider.logout();
+                    onPressed: () {
+                      context.read<AuthBloc>().add(const AuthLogoutRequested());
                       
                       if (mounted) {
                         Navigator.of(context).pushAndRemoveUntil(

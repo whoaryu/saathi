@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:saathi/core/services/service_provider.dart';
-import 'package:saathi/features/auth/presentation/providers/auth_provider.dart';
 import 'package:saathi/features/favorites/domain/models/favorite.dart';
 import 'package:saathi/features/pet_adoption/domain/models/pet.dart';
 import 'package:saathi/features/pet_adoption/presentation/screens/pet_detail_screen.dart';

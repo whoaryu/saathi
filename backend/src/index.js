@@ -1,3 +1,12 @@
+const dns = require('dns');
+// Set DNS servers to Google DNS to prevent c-ares querySrv failures on some network configurations
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+  console.log('📡 System DNS resolver set to Google DNS (8.8.8.8, 8.8.4.4)');
+} catch (e) {
+  console.warn('⚠️ Failed to set custom DNS servers:', e);
+}
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -25,6 +34,8 @@ app.use('/api/pets', require('./routes/pet.routes'));
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/user', require('./routes/user.routes'));
 app.use('/api/favorites', require('./routes/favorites.routes'));
+app.use('/api/bookings', require('./routes/booking.routes'));
+app.use('/api/training', require('./routes/training.routes'));
 
 // Error handling middleware
 app.use(errorHandler);

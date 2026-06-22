@@ -8,6 +8,9 @@ class Pet {
   final String location;
   final String imageUrl;
   final String ownerId;
+  final String? ownerName;
+  final String? ownerEmail;
+  final String? ownerPhone;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -21,12 +24,30 @@ class Pet {
     required this.location,
     required this.imageUrl,
     required this.ownerId,
+    this.ownerName,
+    this.ownerEmail,
+    this.ownerPhone,
     required this.createdAt,
     required this.updatedAt,
   });
 
   factory Pet.fromJson(Map<String, dynamic> json) {
     try {
+      final ownerData = json['owner'];
+      String parsedOwnerId = '';
+      String? parsedOwnerName;
+      String? parsedOwnerEmail;
+      String? parsedOwnerPhone;
+
+      if (ownerData is Map) {
+        parsedOwnerId = ownerData['_id']?.toString() ?? ownerData['id']?.toString() ?? '';
+        parsedOwnerName = ownerData['name']?.toString();
+        parsedOwnerEmail = ownerData['email']?.toString();
+        parsedOwnerPhone = ownerData['phone']?.toString();
+      } else {
+        parsedOwnerId = ownerData?.toString() ?? json['ownerId']?.toString() ?? '';
+      }
+
       return Pet(
         id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
         name: json['name']?.toString() ?? '',
@@ -36,7 +57,10 @@ class Pet {
         description: json['description']?.toString() ?? '',
         location: json['location']?.toString() ?? '',
         imageUrl: json['imageUrl']?.toString() ?? '',
-        ownerId: json['owner']?.toString() ?? json['ownerId']?.toString() ?? '',
+        ownerId: parsedOwnerId,
+        ownerName: parsedOwnerName,
+        ownerEmail: parsedOwnerEmail,
+        ownerPhone: parsedOwnerPhone,
         createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'].toString()) : DateTime.now(),
         updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'].toString()) : DateTime.now(),
       );
@@ -58,8 +82,11 @@ class Pet {
       'location': location,
       'imageUrl': imageUrl,
       'ownerId': ownerId,
+      'ownerName': ownerName,
+      'ownerEmail': ownerEmail,
+      'ownerPhone': ownerPhone,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
   }
-} 
+}

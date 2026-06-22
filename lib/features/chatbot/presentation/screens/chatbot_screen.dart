@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:saathi/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:saathi/features/auth/presentation/bloc/auth_state.dart';
 import 'package:saathi/features/chatbot/domain/models/chat_message.dart';
 import 'package:saathi/features/chatbot/data/services/gemini_service.dart';
 import 'package:saathi/features/chatbot/presentation/widgets/message_bubble.dart';
@@ -97,8 +100,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
     });
 
     try {
+      final authState = context.read<AuthBloc>().state;
+      final userId = authState is AuthAuthenticated
+          ? (authState.user['id'] ?? authState.user['_id'] ?? 'guest')
+          : 'guest';
+      
       // Try to use actual Gemini API response
-      final response = await _geminiService.generateResponse(message, _messages);
+      final response = await _geminiService.generateResponse(message, _messages, userId.toString());
       
       // Simulate typing delay
       await Future.delayed(const Duration(milliseconds: 1000));

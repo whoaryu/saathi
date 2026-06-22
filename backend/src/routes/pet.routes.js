@@ -36,7 +36,7 @@ router.get('/', async (req, res) => {
     }
 
     const pets = await Pet.find(query)
-      .populate('owner', 'name email')
+      .populate('owner', 'name email phone')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const pet = await Pet.findById(req.params.id)
-      .populate('owner', 'name email')
+      .populate('owner', 'name email phone')
       .populate('adoptionRequests.user', 'name email');
 
     if (!pet) {

@@ -49,6 +49,21 @@ class _FavoriteButtonState extends State<FavoriteButton>
       parent: _animationController,
       curve: Curves.elasticOut,
     ));
+
+    if (!_isFavorited) {
+      _checkStatus();
+    }
+  }
+
+  Future<void> _checkStatus() async {
+    try {
+      final favorited = await _serviceProvider.favoritesService.isFavorited(widget.petId);
+      if (mounted && favorited) {
+        setState(() {
+          _isFavorited = true;
+        });
+      }
+    } catch (_) {}
   }
 
   @override
